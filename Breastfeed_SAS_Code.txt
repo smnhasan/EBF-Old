@@ -1,0 +1,353 @@
+
+
+PROC CONTENTS DATA=WORK.IMPORT; 
+RUN;
+
+*handling missing values;
+data brr;
+set WORK.IMPORT;
+   if      V106=9 then V106=.;
+   if      V130=99 then V130=.;
+   if      V704=99 then V704="";
+   if      V730=99 then V730=.;
+	if      V730=98 then V730=.;
+   if      V159=9 then V159=.;
+   if      V157=9 then V157="";
+   if      V445=9999 then V445=.;
+   if      V716=99 then V716=.;
+   	if      V716=98 then V716=.;
+   if       M17=9 then M17="";
+   if      V413=9 then V413=.;
+  	 if      V413=8 then V413=.;
+   if       M15=99 then M15="";
+   if       M18=9 then M18="";
+   	if       M18=8 then M18="";
+   if       M54=9 then M54="";
+   if M54="Don" then M54="";
+	if       M54=8 then M54=.;
+   if       H10=9 then H10="";
+      if H10="Don" then H10="";
+	if       H10=8 then H10=.;
+   if      HW15=9 then HW15=.;
+   if       HW2=9999 then HW2=.;
+   if      H12Z=9 then H12Z=.;
+   if      H11B=9 then H11B="";
+	if      H11B=8 then H11B=.;
+   if      H32Z=9 then H32Z="";
+   if      H31B=9 then H31B="";
+  	 if      H31B="Don" then H31B="";
+   if      H31C=9 then H31C="";
+  	 if      H31C=8 then H31C=.;
+  	 if      H31C="Don't know" then H31C="";
+  	 if V701 =9 then V701="";
+  	 if H11 =9 then H11="";
+  	 if H11 ="Don't know" then H11="";
+  	 if V704 = "Don't know" then V704 = "";
+  	 if BMIcat = 0 then BMIcat = .;
+  	 V005_new = V005/1000000;
+run;
+
+
+data brr2;
+set brr;
+*rename parants characteristics;
+rename 
+V013=mothers_age_cat
+V024=Division 
+V025= residence 
+V106= education
+V130=Religion
+V136= HH_members
+V730= fathers_age
+V157=newspaper
+V159=television
+V190=Wealth_index 
+V201=Total_children
+V213=Currently_pregnant
+V445=BMI
+V701 = fathers_edu
+V136 = HH_members
+V704 = HH_Occu
+V714 = mothers_work;
+*rename child characteristic;
+rename 
+M17=C_section
+B4=Sex_of_child
+B8=age_of_child
+HW1= age_child_month
+M15=Place_of_delivery 
+M18=Size_of_child_at_birth 
+M54=Vitamin_A
+H10=vaccination
+HW1=age_child_month;
+*rename risk factor;
+rename
+H11B=Blood_in_the_stools 
+H32Z=Fever_or_cough_medical_treatment 
+H31B=Short_rapid_breaths 
+H31C= chest_Nose
+H11 = Diarrhea
+
+v005_new = sample_weight
+V022 = strata;
+run;
+
+
+proc surveyfreq data = brr2;
+table religion;
+run;
+
+
+DATA brr3;
+  SET brr2;
+  
+ IF age_child_month > 5 THEN DELETE ;
+
+  
+  HH_members_cat = .;
+  IF (HH_members <=5) Then HH_members_cat = 1;
+  IF (HH_members > 5) Then HH_members_cat = 2;
+  
+ Place_of_delivery_cat = .;
+      if Place_of_delivery ="District hospital" then Place_of_delivery_cat = 2;
+      if Place_of_delivery ="Maternal and child welf" then Place_of_delivery_cat = 3 ;
+      if Place_of_delivery ="NGO static clinic" then Place_of_delivery_cat = 3;
+      if Place_of_delivery ="Other" then Place_of_delivery_cat = 3;
+      if Place_of_delivery ="Other NGO sector" then Place_of_delivery_cat = 3;
+      if Place_of_delivery ="Other public sector" then Place_of_delivery_cat = 2  ;
+      if Place_of_delivery ="Private hospital/clinic" then Place_of_delivery_cat = 3;
+      if Place_of_delivery ="Public hospital" then Place_of_delivery_cat = 2;
+      if Place_of_delivery ="Respondent's home" then Place_of_delivery_cat = 1;
+      if Place_of_delivery ="Upazila health & family" then Place_of_delivery_cat = 2;
+      if Place_of_delivery ="Upazila health complex" then Place_of_delivery_cat = 2;
+      
+      mothers_age_cat_new = .;
+      if mothers_age_cat ="15-19" then mothers_age_cat_new = 1;
+      if mothers_age_cat ="20-24" then mothers_age_cat_new = 2;
+      if mothers_age_cat ="25-29" then mothers_age_cat_new = 3;
+      if mothers_age_cat ="30-34" then mothers_age_cat_new = 3;
+      if mothers_age_cat ="35-39" then mothers_age_cat_new = 3;
+      if mothers_age_cat ="40-44" then mothers_age_cat_new = 3;
+      if mothers_age_cat ="45-49" then mothers_age_cat_new = 3;
+   
+      
+      
+      HH_occu_new = "";
+      if HH_occu ="Farmer" then HH_occu_new = 1 ;
+      if HH_occu ="Agricultural Worker" then HH_occu_new = 2 ;
+      if HH_occu ="Big businessman" then HH_occu_new = 3;
+      if HH_occu ="Small business/trader" then HH_occu_new = 3;
+      if HH_occu ="Carpenter, mason, bus/taxi driver, construction supervisor, seamstresses/tailor, policeman, armed services, dai, communi" then HH_occu_new = 4;
+      if HH_occu ="Doctor, lawyer, dentist, accountant, teacher, nurse, family welfare visitor, mid and high level services (government/pri" then HH_occu_new = 4;
+      if HH_occu ="Fisherman" then HH_occu_new = 4;
+      if HH_occu ="Home-based manufacturing (handicraft, food products)" then HH_occu_new = 4;
+      if HH_occu ="Land Owner" then HH_occu_new = 4;
+      if HH_occu ="Non-agricultural worker (factory worker, blue collar service)" then HH_occu_new = 4;
+      if HH_occu ="Others" then HH_occu_new = 4;
+      if HH_occu ="Rickshaw driver, brick breaking, road building, construction worker, boatman, and earth work etc." then HH_occu_new = 4;	
+      if HH_occu ="Unemployed/student" then HH_occu_new = 4;
+
+      
+      religion_new = "";
+      if religion ="Islam" then religion_new = 1 ;
+      if religion ="Hinduism" then religion_new = 2 ;
+      if religion ="Buddhism" then religion_new = 2 ;
+      
+      
+      Bmicat_new = "";
+      if Bmicat =1 then Bmicat_new = "Under" ;
+      if Bmicat =2 then Bmicat_new= "Normal" ;
+      if Bmicat =3 then Bmicat_new = "O" ;
+      if Bmicat =4 then Bmicat_new = "O" ;
+
+      
+      Size_of_child_at_birth_new = "";
+      if Size_of_child_at_birth ="Average" then Size_of_child_at_birth_new = "A" ;
+      if Size_of_child_at_birth ="Larger than average" then Size_of_child_at_birth_new= "L" ;
+      if Size_of_child_at_birth ="Smaller than average" then Size_of_child_at_birth_new = "S" ;
+      if Size_of_child_at_birth ="Very large" then Size_of_child_at_birth_new = "L" ;
+      if Size_of_child_at_birth ="Very small" then Size_of_child_at_birth_new = "S" ;
+      
+      age_new = .;
+      if age =0 then age_new = 1;
+      if age =1 then age_new = 1;
+      if age =2 then age_new = 2;
+      if age =3 then age_new = 2;
+      if age =4 then age_new = 3;
+      if age =5 then age_new = 3;
+      
+      BMI = BMI/100;
+      BMI_category = .;
+  IF (BMI<18.5) THEN BMI_category = 1;
+  IF (BMI>=18.5) and (BMI<24.9) THEN BMI_category = 2;
+  IF (BMI>=25) and (BMI<29.9) THEN BMI_category = 3;
+  IF (BMI>=29.9) THEN BMI_category = 4;
+  
+  Bmicat_new = "";
+      if BMI_category =1 then Bmicat_new = 1 ;
+      if BMI_category =2 then Bmicat_new= 2 ;
+      if BMI_category =3 then Bmicat_new =3;
+      if BMI_category =4 then Bmicat_new = 3 ;
+
+      
+
+  Wealth_index_new = "    ";
+      if Wealth_index ="Middle" then Wealth_index_new = "M" ;
+      if Wealth_index ="Poorer" then Wealth_index_new= "P" ;
+      if Wealth_index ="Poorest" then Wealth_index_new ="Ps";
+      if Wealth_index ="Richer" then Wealth_index_new = "R" ;
+      if Wealth_index ="Richest" then Wealth_index_new = "R" ;
+      run;
+      
+
+
+proc genmod data=brr3;
+class EBF (ref="EBF") V001 strata ;
+model disease_Count = EBF /dist=negbin link=log type3;
+weight Sample_weight;
+repeated subject = V001(strata);
+store p1;
+run;
+
+ods output ParameterEstimates = est;
+proc plm source = p1;
+  show parameters;
+run;
+
+data est_exp;
+  set est;
+  irr = exp(estimate);
+  if parameter ^="Intercept";
+   low_or=exp(estimate-1.96*stderr);
+hi_or=exp(estimate+1.96*stderr);
+run;
+proc print data = est_exp;
+
+run;
+
+proc print data=est_exp;
+ id Parameter irr low_or hi_or;
+run;
+
+proc surveyfreq data=brr3 ;
+      tables   Division  *EBF  / row chisq;
+      strata  strata;
+      cluster V001;
+      weight  Sample_weight;
+   run;
+
+   
+proc genmod data=brr3 ;
+class EBF (ref="EBF") mothers_age_cat_new (ref="3") Division (ref="Sylhet") 
+residence (ref="Urban") education (ref="No education") mothers_work (ref="No")
+HH_occu_new (ref="4") MassMedia (ref="1") Wealth_index(ref="Richest") BMIcat_new (ref="2")
+HH_members_cat (ref="2") C_section Sex_of_child (ref="Male")  Size_of_child_at_birth_new  (ref="S") age_new  (ref="1")
+V001 strata religion_new;
+model disease_Count  = EBF mothers_age_cat_new Division residence education mothers_work 
+HH_occu_new  MassMedia Wealth_index BMIcat_new HH_members_cat C_section Sex_of_child  Size_of_child_at_birth_new age_new   religion_new      /dist=negbin link=log type3;
+weight Sample_weight;
+repeated subject = V001(strata);
+store p1;
+run;
+
+ods output ParameterEstimates = est;
+proc plm source = p1;
+  show parameters;
+run;
+
+data est_exp;
+  set est;
+  irr = exp(estimate);
+  if parameter ^="Intercept";
+   low_or=exp(estimate-1.96*stderr);
+hi_or=exp(estimate+1.96*stderr);
+run;
+proc print data = est_exp;
+
+run;
+
+proc print data=est_exp;
+ id Parameter irr low_or hi_or;
+run;
+
+proc surveyfreq data=brr3 ;
+      tables   Division  *EBF  / row chisq;
+      strata  strata;
+      cluster V001;
+      weight  Sample_weight;
+   run;
+
+proc genmod data = brr3 ;
+  class EBF (ref="EBF") V001 strata;
+  model disease_Count = EBF /dist=zinb type3;
+  zeromodel/link = logit;
+  store p1;
+  strata  strata;
+  weight  Sample_weight;
+run;
+
+ods output ParameterEstimates = est;
+proc plm source = p1;
+  show parameters;
+run;
+
+data est_exp;
+  set est;
+  irr = exp(estimate);
+  if parameter ^="Intercept";
+   low_or=exp(estimate-1.96*stderr);
+hi_or=exp(estimate+1.96*stderr);
+run;
+proc print data = est_exp;
+
+run;
+
+proc print data=est_exp;
+ id Parameter irr low_or hi_or;
+run;
+
+
+
+proc surveyfreq data=brr3 ;
+      tables   disease_Count *age_new / row chisq;
+      strata  strata;
+      cluster V001;
+      weight  Sample_weight;
+   run;
+
+proc genmod data = brr3 ;
+class EBF (ref="EBF") mothers_age_cat_new (ref="3") Division (ref="Barisal") 
+residence (ref="Urban") education (ref="Higher") mothers_work (ref="No")
+HH_occu_new (ref="4") MassMedia (ref="0") Wealth_index_new (ref="R") BMIcat_new (ref="1")
+HH_members_cat (ref="2") C_section (ref="No") Sex_of_child (ref="Female")  Size_of_child_at_birth_new  (ref="L") age_new  (ref="1")
+V001 strata religion_new;
+model disease_Count  = EBF mothers_age_cat_new Division residence education mothers_work 
+HH_occu_new  MassMedia Wealth_index_new BMIcat_new HH_members_cat C_section Sex_of_child  
+Size_of_child_at_birth_new  age_new religion_new /dist=zinb type3;
+  zeromodel /link = logit;
+  store p1;
+  strata  strata;
+  weight  Sample_weight;
+run;
+
+ods output ParameterEstimates = est;
+proc plm source = p1;
+  show parameters;
+run;
+
+data est_exp;
+  set est;
+  irr = exp(estimate);
+  if parameter ^="Intercept";
+   low_or=exp(estimate-1.96*stderr);
+hi_or=exp(estimate+1.96*stderr);
+run;
+proc print data = est_exp;
+
+run;
+
+proc print data=est_exp;
+ id Parameter irr low_or hi_or;
+run;
+
+

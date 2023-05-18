@@ -1,0 +1,402 @@
+******************************************************************************** 
+*2019
+********************************************************************************
+
+clear
+*directory
+cd "E:\ResearchProject\Jamal Sir\Breastfeed\Final"
+use "BF" , clear
+
+********************************************************************************
+*WEIGHT, STRATA, CLUSTER VARIABLE FOR THE APPENDED DATA
+********************************************************************************
+gen wgt=V005/1000000
+svyset [pw=wgt],psu(V001) strata(V022)
+
+********************************************************************************
+*Checking information with report
+********************************************************************************
+
+*Mother Age.
+svy: tab V013
+gen mage1=V013
+recode mage1 1=1
+recode mage1 2=2
+recode mage1 3/7=3
+label define mage1 1 "15-19" 2 "20-24" 3 "25+"
+label values mage mage1
+svy: tab mage
+tab mage ebf, col
+svy: tab mage ebf, col
+
+
+*Residence.
+svy: tab V025
+gen area1=V025
+recode area1 1=1
+recode area1 2=2
+label define area1  2 "Rural" 1 "Urban"
+label values area area1
+svy: tab area
+tab area ebf, col
+svy: tab area ebf, col
+
+*Division.
+svy: tab V024
+gen division1=V024
+label define division1  1 "Barisal" 2 "Chittagong" 3 "Dhaka" 4 "Khulna" 5 "Rajshahi" 6 "Rangpur" 7 "Sylhet"
+label values division division1
+tab division ebf, col
+svy: tab division ebf, col
+
+*Mother Education.
+svy: tab V106
+gen melevel1 = V106
+label define melevel1  0 "No education" 1 "Primary" 2 "Secondary" 3 "Higher"
+label values melevel melevel1
+svy: tab melevel
+tab melevel ebf, col
+svy: tab melevel ebf, col
+
+
+*Mother work.
+svy: tab V714
+gen mwork1 = V714
+label define mwork1  0 "No" 1 "Yes"
+label values mwork mwork1
+svy: tab mwork
+tab mwork ebf, col
+svy: tab mwork ebf, col
+
+
+*HH Occu.
+svy: tab V704
+gen hhocu1 = V704
+recode hhocu1 12=1
+recode hhocu1 13=2
+recode hhocu1 51/52=3
+recode hhocu1 11=4
+recode hhocu1 14=4
+recode hhocu1 16=4
+recode hhocu1 21=4
+recode hhocu1 23=4
+recode hhocu1 31=4
+recode hhocu1 41=4
+recode hhocu1 61=4
+recode hhocu1 96=4
+recode hhocu1 98/99=.
+label define hhocu1  1 "Farmer" 2 "Agriculture" 3 "Businessman" 4 "Others"
+label values hhocu hhocu1
+svy: tab hhocu
+tab hhocu ebf, col
+svy: tab hhocu ebf, col
+
+*Religion.
+svy: tab V130
+gen religion1=V130
+recode religion1 1=1
+recode religion1 2/4=2
+label define religion1 1 "Islam" 2 "Others"
+label values religion religion1
+svy: tab religion
+tab religion ebf, col
+svy: tab religion ebf, col
+
+*Wealth index Status.
+gen wind1= V190
+svy: tab wind1
+label define wind1  1 "Poorest" 2 "Poorer" 3 "Middle" 4 "Richer" 5 "Richest"
+label values wind wind1
+tab wind ebf, col
+svy: tab wind ebf, col
+
+
+*Body Mass Index.
+tab V445
+recode V445 9999 = .
+gen BMI1 = V445/100
+replace  BMI1    = 1 if (BMI < 18.5) 
+replace  BMI1    = 2 if (BMI >= 18.5) & (BMI <25) 
+replace  BMI1    = 3 if (BMI >= 25) 
+label define BMI1 1 "Under" 2 "Normal" 3 "Over"
+label values BMI BMI1
+svy: tab BMI
+tab BMI ebf, row
+svy: tab BMI ebf, row
+
+
+*HH family members.
+gen hhmembers = V136
+svy: tab hhmembers
+replace  hhmembers    = 1 if (hhmembers <= 3) 
+replace  hhmembers   = 2 if (hhmembers > 3)
+label define hhmembers1 1 "less equal 3" 2 "greater 3"
+label values hhmembers hhmembers1
+tab hhmembers ebf, row
+svy: tab hhmembers ebf, row
+
+*household head sex.
+gen hhsex1 = V151
+svy: tab hhsex1
+label define hhsex1 1 "Male" 2 "Female"
+label values hhsex hhsex1
+tab hhsex ebf, row
+svy: tab hhsex ebf, row
+
+*ANC (NW).
+svy: tab M14
+gen anc1=M14
+recode anc1 0/3=1
+recode anc1 4/20=2
+recode anc1 98=.
+label define anc1 1 "less4" 2 "4above"
+label values anc anc1
+svy: tab anc
+tab anc ebf, row
+svy: tab anc ebf, row
+
+*media
+svy: tab V121
+gen tv=V121
+svy: tab tv
+recode tv 0=0
+recode tv 1=1
+recode tv 7=0
+tab tv ebf, row
+svy: tab tv ebf, row
+
+svy: tab V120
+gen radio=V120
+svy: tab radio
+recode radio 0=0
+recode radio 1=1
+recode radio 7=0
+tab radio ebf, row
+svy: tab radio ebf, row
+
+gen media1 = tv + radio
+tab media1
+recode media1 0=0
+recode media1 1/2=1
+label define media1 0 "No" 1 "Yes"
+label values media media1
+tab media ebf, row
+svy: tab media ebf, row
+
+
+***Child Information
+
+*C-section.
+gen csection1 = M17
+svy: tab csection1
+label define csection1 0 "No" 1 "Yes"
+label values csection csection1
+tab csection ebf, row
+svy: tab csection ebf, row
+
+*child sex.
+svy: tab B4
+gen csex1 = B4
+label define csex1 1 "Male" 2 "Female"
+label values csex csex1
+tab csex ebf, row
+svy: tab csex ebf, row
+
+*Type of toilet facility.
+svy: tab V116
+gen tf1=V116
+recode tf1 10/15=1
+recode tf1 20/97=2
+recode tf1 99=.
+label define tf1 1 "Modern toilet" 2 "Other"
+label values tf tf1
+svy: tab tf
+tab tf ebf, row
+svy: tab tf ebf, row
+
+*partners scholling type
+svy: tab S803A
+gen pschtype1=S803A
+svy: tab pschtype1
+label define pschtype1 1 "School" 2 "Madrasha"
+label values pschtype pschtype1
+tab pschtype ebf, row
+svy: tab pschtype ebf, row
+
+
+*child size.
+gen csize1 = M18
+svy: tab csize1
+recode csize1 1/2=1
+recode csize1 3=2
+recode csize1 4/5=3
+label define csize1 1 "Large" 2 "Middle" 3 "Small"
+label values csize csize1
+tab csize ebf, row
+svy: tab csize ebf, row
+
+* Child Age.
+gen cage1 = HW1
+svy: tab cage1
+recode cage1 0/1=1
+recode cage1 2/3=2
+recode cage1 4/5=3
+label define cage1 1 "0-1" 2 "2-3" 3 "4-5"
+label values cage cage1
+tab cage ebf, row
+svy: tab cage ebf, row
+
+*Place of delivery (NW).
+svy: tab M15
+gen Place_delivery1=M15
+recode Place_delivery1 10/11=1
+recode Place_delivery1 20/96=2
+recode Place_delivery1 99=.
+label define Place_delivery1 1 "Home" 2 "HF"
+label values Place_delivery Place_delivery1
+svy: tab Place_delivery
+tab Place_delivery ebf, row
+svy: tab Place_delivery ebf, row
+
+*Weight for Age underweight.
+tab HW71
+recode HW71 9996 = .
+recode HW71 9997 = .
+recode HW71 9998 = .
+tab HW71
+generate underweight1    = .
+replace  underweight1    = 1 if (HW71 <= -200) 
+replace  underweight1   = 2 if (HW71 > -200) & (HW71 <.) 
+label define underweight1 1 "Yes" 2 "No"
+label values underweight underweight1
+svy: tab underweight
+tab underweight ebf, row
+svy: tab underweight ebf, row
+
+*Height for Age Stunned.
+tab HW70
+recode HW70 9996 = .
+recode HW70 9997 = .
+recode HW70 9998 = .
+tab HW70
+generate Stunned1    = .
+replace  Stunned1    = 1 if (HW70 <= -200) 
+replace  Stunned1    = 2 if (HW70 > -200) & (HW70 <.) 
+label define Stunned1 1 "Yes" 2 "No"
+label values Stunned Stunned1
+svy: tab Stunned
+tab Stunned ebf, row
+svy: tab Stunned ebf, row
+
+*Weight for Age Wasted.
+tab HW72
+recode HW72 9996 = .
+recode HW72 9997 = .
+recode HW72 9998 = .
+tab HW72
+generate Wasted1    = .
+replace  Wasted1    = 1 if (HW72 <= -200) 
+replace  Wasted1    = 2 if (HW72 > -200) & (HW72 <.) 
+label define Wasted1 1 "Yes" 2 "No"
+label values Wasted Wasted1
+svy: tab Wasted
+tab Wasted ebf, row
+svy: tab Wasted ebf, row
+
+*birth order
+svy: tab BORD
+gen birthord1=BORD
+svy: tab birthord1
+recode birthord1 1/3=1
+recode birthord1 4/6=2
+recode birthord1 7/10=3
+label define birthord1 1 "1-3" 2 "4-6" 3 "7-10"
+label values birthord birthord1
+tab birthord ebf, row
+svy: tab birthord ebf, row
+
+
+*Early Childhood Disease.
+*Fever
+svy: tab H22
+gen fever=H22
+tab fever
+
+svy: tab H31B
+generate breath10    = H31B
+replace  breath10    = 0 if  (breath10 ==0)
+replace  breath10    = 0 if  missing(breath10)
+replace  breath10    = 1 if (breath10 == 1) 
+tab breath10
+
+svy: tab H31
+gen cough=H31
+recode cough 1/2 = 1
+svy: tab cough
+
+svy: tab H11B
+gen stools3=H11B
+replace  stools3    = 0 if  (stools3 ==0)
+replace  stools3    = 0 if  missing(stools3)
+replace  stools3    = 1 if (stools3 == 1) 
+tab stools3
+
+svy: tab H11
+gen diarrhea=H11
+recode diarrhea 1/2 = 1
+svy: tab diarrhea
+
+gen disease = fever+breath10+cough+stools3+diarrhea
+recode disease 0=0
+recode disease 1=1
+recode disease 2=2
+recode disease 3=3
+recode disease 4/5=4
+tab disease
+
+***Decision of best model
+zip disease ebf, inflate(_cons) vuong nolog
+estimates store zip
+zinb disease ebf, inflate(_cons) vuong nolog
+estimates store zinb
+poisson disease ebf
+estimates store pois
+nbreg disease ebf
+estimates store nb
+
+estimates stats zinb zip pois nb
+
+*The ZIP model has smaller AIC and BIC values; 
+*we thus conclude that it fits our data better than the standard Poisson model.
+********************************************************************************
+**Univariate Logistic regression
+********************************************************************************
+ebf mage area division# melevel mwork hhocu religion wind# BMI hhmembers* 
+hhsex anc media# csection csex tf pschtype csize cage# Place_delivery
+underweight Stunned Wasted birthord#.
+
+svy: zip disease ib1.ebf, inflate(_cons) irr
+svy: zip disease ib3.mage, inflate(_cons) irr
+svy: zip disease i.area, inflate(_cons) irr
+svy: zip disease i.division, inflate(_cons) irr
+svy: zip disease i.melevel, inflate(_cons) irr
+svy: zip disease i.mwork, inflate(_cons) irr
+svy: zip disease i.hhocu, inflate(_cons) irr
+svy: zip disease i.religion, inflate(_cons) irr
+svy: zip disease i.wind, inflate(_cons) irr
+svy: zip disease i.BMI, inflate(_cons) irr
+svy: zip disease i.hhmembers, inflate(_cons) irr
+svy: zip disease i.hhsex, inflate(_cons) irr
+svy: zip disease i.anc, inflate(_cons) irr
+svy: zip disease i.media, inflate(_cons) irr
+svy: zip disease i.csection, inflate(_cons) irr
+svy: zip disease i.csex, inflate(_cons) irr
+svy: zip disease i.tf, inflate(_cons) irr
+svy: zip disease i.pschtype, inflate(_cons) irr
+svy: zip disease i.csize, inflate(_cons) irr
+svy: zip disease i.cage, inflate(_cons) irr
+svy: zip disease i.Place_delivery, inflate(_cons) irr
+svy: zip disease i.underweight, inflate(_cons) irr
+svy: zip disease i.Stunned, inflate(_cons) irr
+svy: zip disease i.Wasted, inflate(_cons) irr
+svy: zip disease i.birthord, inflate(_cons) irr
